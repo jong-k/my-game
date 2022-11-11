@@ -1,3 +1,4 @@
+// type: 'load' : 서버로부터 전체 파일 (HTML, CSS, image 등) 을 모두 응답으로 받았을 때
 window.addEventListener('load', function () {
 	// canvas setup
 	const canvas = document.getElementById('canvas1') as HTMLCanvasElement;
