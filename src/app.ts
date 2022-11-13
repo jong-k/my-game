@@ -75,9 +75,13 @@ window.addEventListener('load', function () {
 		height: number;
 		x: number;
 		y: number;
+		frameX: number;
+		frameY: number;
+		maxFrame: number;
 		speedY: number;
 		maxSpeed: number;
 		projectiles: Projectile[];
+		image: HTMLImageElement;
 
 		constructor(game: Game) {
 			this.game = game;
@@ -85,27 +89,51 @@ window.addEventListener('load', function () {
 			this.height = 190;
 			this.x = 20;
 			this.y = 100;
+			this.frameX = 0;
+			this.frameY = 0;
+			this.maxFrame = 37; // player.png는 37장 이미지 갖고 잇음
 			this.speedY = -1; // player의 속도. 음수이면 위로 움직임
 			this.maxSpeed = 2;
 			this.projectiles = [];
+			this.image = document.getElementById('player') as HTMLImageElement;
 		}
 		update() {
-			if (this.game.keys.includes('ArrowUp')) this.speedY = -this.maxSpeed;
+			if (this.game.keys.includes('ArrowUp'))
+				this.speedY = -this.maxSpeed; // y 감소
 			else if (this.game.keys.includes('ArrowDown'))
-				this.speedY = this.maxSpeed;
+				this.speedY = this.maxSpeed; // y 증가
 			else this.speedY = 0;
 			this.y += this.speedY; // player 움직이게 하는 동작
-			// handle projectiles
+			// 투사체 조작
 			this.projectiles.forEach((projectile) => {
 				projectile.update();
 			});
 			this.projectiles = this.projectiles.filter(
-				(projectile) => !projectile.markedForDeletion // false인 것만 남김
+				(projectile) => !projectile.markedForDeletion // false인 것만 남김 (true인 것은 배열에서 빠져서 렌더링 안됨)
 			);
+			// sprite animation
+			// 살짝 다르고 크게는 같은 이미지 여러장이 일렬로 늘어선 이미지를 사용하여,
+			// 일정 부분씩 잘라서 연속적으로 렌더링하면서 마치 플레이어가 움직이는 듯한 효과를 줌
+			if (this.frameX < this.maxFrame) {
+				this.frameX++;
+			} else {
+				this.frameX = 0;
+			}
 		}
 		draw(context: CanvasRenderingContext2D) {
 			context.fillStyle = 'black';
 			context.fillRect(this.x, this.y, this.width, this.height);
+			context.drawImage(
+				this.image,
+				this.frameX * this.width,
+				this.frameY * this.height,
+				this.width,
+				this.height,
+				this.x,
+				this.y,
+				this.width,
+				this.height
+			);
 			this.projectiles.forEach((projectile) => projectile.draw(context));
 		}
 		shootTop() {
@@ -124,6 +152,8 @@ window.addEventListener('load', function () {
 		x: number;
 		speedX: number;
 		markedForDeletion: boolean;
+		lives: number;
+		score: number;
 		abstract width: number;
 		abstract height: number;
 		abstract y: number;
@@ -133,6 +163,8 @@ window.addEventListener('load', function () {
 			this.x = this.game.width;
 			this.speedX = Math.random() * -1.5 - 0.5; // 적들은 오른쪽 끝에서 다가오는 위치
 			this.markedForDeletion = false;
+			this.lives = 5;
+			this.score = this.lives;
 		}
 
 		update() {
@@ -144,6 +176,9 @@ window.addEventListener('load', function () {
 		draw(context: CanvasRenderingContext2D) {
 			context.fillStyle = 'red';
 			context.fillRect(this.x, this.y, this.width, this.height);
+			context.fillStyle = 'black';
+			context.font = '20px Helvetica';
+			context.fillText(String(this.lives), this.x, this.y);
 		}
 	}
 
@@ -151,6 +186,7 @@ window.addEventListener('load', function () {
 		width: number;
 		height: number;
 		y: number;
+
 		constructor(game: Game) {
 			super(game);
 			this.width = 228 * 0.2;
@@ -160,10 +196,70 @@ window.addEventListener('load', function () {
 	}
 
 	// 부드러운 스크롤 등 각 레이어 처리를 담당
-	// class Layer {}
+	class Layer {
+		game: Game;
+		image: CanvasImageSource;
+		speedModifier: number;
+		width: number;
+		height: number;
+		x: number;
+		y: number;
+
+		constructor(game: Game, image: CanvasImageSource, speedModifier: number) {
+			this.game = game;
+			this.image = image;
+			this.speedModifier = speedModifier;
+			this.width = 1768;
+			this.height = 500;
+			this.x = 0;
+			this.y = 0;
+		}
+		update() {
+			// 배경 이미지가 (0, 0) 을 지나서 왼쪽으로 계속 가다가(음수), 이미지 width를 지나면 다시 0으로 초기화
+			if (this.x <= -this.width) this.x = 0;
+			this.x -= this.game.speed * this.speedModifier;
+		}
+		draw(context: CanvasRenderingContext2D) {
+			// 이미지를 2개를 연달아 배치하여, 첫 이미지 끝나고 잠깐 빈 화면이 보이는 것을 방지
+			// 2번째 이미지는 한 캔버스 크기만 보이게 됨
+			context.drawImage(this.image, this.x, this.y);
+			context.drawImage(this.image, this.x + this.width, this.y);
+		}
+	}
 
 	// 모든 레이어를 모음
-	// class Background {}
+	class Background {
+		game: Game;
+		image1: HTMLImageElement;
+		image2: HTMLImageElement;
+		image3: HTMLImageElement;
+		image4: HTMLImageElement;
+		layer1: Layer;
+		layer2: Layer;
+		layer3: Layer;
+		layer4: Layer;
+		layers: Layer[];
+
+		constructor(game: Game) {
+			this.game = game;
+			this.image1 = document.getElementById('layer1') as HTMLImageElement;
+			this.image2 = document.getElementById('layer2') as HTMLImageElement;
+			this.image3 = document.getElementById('layer3') as HTMLImageElement;
+			this.image4 = document.getElementById('layer4') as HTMLImageElement;
+			this.layer1 = new Layer(this.game, this.image1, 0.2);
+			this.layer2 = new Layer(this.game, this.image2, 0.4);
+			this.layer3 = new Layer(this.game, this.image3, 1);
+			this.layer4 = new Layer(this.game, this.image4, 1.5);
+			// layer4는 가장 앞에 렌더링되어야 하기 때문에 따로 빼줌
+			this.layers = [this.layer1, this.layer2, this.layer3];
+		}
+		update() {
+			this.layers.forEach((layer) => layer.update());
+		}
+		draw(context: CanvasRenderingContext2D) {
+			this.layers.forEach((layer) => layer.draw(context));
+		}
+	}
 
 	// 타이머, 글로벌 UI
 	class UI {
@@ -178,11 +274,52 @@ window.addEventListener('load', function () {
 			this.color = 'white';
 		}
 		draw(context: CanvasRenderingContext2D) {
+			// 기본값을 저장하고 변형한 것을 렌더링하다가
+			context.save();
+			context.fillStyle = this.color;
+			// 그림자를 X축으로 드리우기
+			context.shadowOffsetX = 2;
+			context.shadowOffsetY = 2;
+			context.shadowColor = 'black';
+			context.font = this.fontSize + 'px ' + this.fontFamily;
+			// 점수
+			context.fillText('Score: ' + this.game.score, 20, 40);
 			// 총알
 			context.fillStyle = this.color;
 			for (let i = 0; i < this.game.ammo; i++) {
 				context.fillRect(20 + 5 * i, 50, 3, 20);
 			}
+			// 타이머
+			const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
+			context.fillText('Timer: ' + formattedTime, 20, 100);
+			// 게임 오버 메시지
+			if (this.game.gameOver) {
+				context.textAlign = 'center';
+				let message1;
+				let message2;
+				if (this.game.score > this.game.winningScore) {
+					message1 = 'You win!';
+					message2 = 'Well done!';
+				} else {
+					message1 = 'You lose!';
+					message2 = 'Try again next time!';
+				}
+				context.font = '50px ' + this.fontFamily;
+				context.fillText(
+					message1,
+					this.game.width * 0.5,
+					this.game.height * 0.5 - 40
+				);
+				context.font = '25px ' + this.fontFamily;
+				context.fillText(
+					message2,
+					this.game.width * 0.5,
+					this.game.height * 0.5 + 40
+				);
+			}
+			// 다시 복구.
+			// save and restore를 안하게 되면, 렌더링되는 모든 값에 그림자가 생김
+			context.restore();
 		}
 	}
 
@@ -190,6 +327,7 @@ window.addEventListener('load', function () {
 	class Game {
 		width: number;
 		height: number;
+		background: Background;
 		player: Player;
 		input: InputHandler;
 		ui: UI;
@@ -202,10 +340,16 @@ window.addEventListener('load', function () {
 		ammoTimer: number;
 		ammoInterval: number;
 		gameOver: boolean;
+		score: number;
+		winningScore: number;
+		gameTime: number;
+		timeLimit: number;
+		speed: number;
 
 		constructor(width: number, height: number) {
 			this.width = width;
 			this.height = height;
+			this.background = new Background(this);
 			this.player = new Player(this);
 			this.input = new InputHandler(this);
 			this.ui = new UI(this);
@@ -218,8 +362,18 @@ window.addEventListener('load', function () {
 			this.enemyTimer = 0;
 			this.enemyInterval = 1000;
 			this.gameOver = false;
+			this.score = 0;
+			this.winningScore = 10;
+			this.gameTime = 0;
+			this.timeLimit = 5000;
+			this.speed = 1;
 		}
 		update(deltaTime: number) {
+			if (!this.gameOver) this.gameTime += deltaTime;
+			if (this.gameTime > this.timeLimit) this.gameOver = true;
+			this.background.update();
+			// layer4만 따로 빼서 맨 앞에 배치되게 함
+			this.background.layer4.update();
 			// 총알 자동 생성
 			this.player.update();
 			if (this.ammoTimer > this.ammoInterval) {
@@ -232,6 +386,20 @@ window.addEventListener('load', function () {
 			// 적 자동 출현
 			this.enemies.forEach((enemy) => {
 				enemy.update();
+				if (this.checkCollision(this.player, enemy)) {
+					enemy.markedForDeletion = true;
+				}
+				this.player.projectiles.forEach((projectile) => {
+					if (this.checkCollision(projectile, enemy)) {
+						enemy.lives--;
+						projectile.markedForDeletion = true;
+						if (enemy.lives <= 0) {
+							enemy.markedForDeletion = true;
+							if (!this.gameOver) this.score += enemy.score;
+							if (this.score > this.winningScore) this.gameOver = true;
+						}
+					}
+				});
 			});
 			this.enemies = this.enemies.filter((enemy) => !enemy.markedForDeletion);
 			if (this.enemyTimer > this.enemyInterval && !this.gameOver) {
@@ -242,22 +410,34 @@ window.addEventListener('load', function () {
 			}
 		}
 		draw(context: CanvasRenderingContext2D) {
+			// background를 가장 먼저 draw해서 가장 뒤에 위치하게 함
+			this.background.draw(context);
 			this.player.draw(context);
 			this.ui.draw(context);
 			this.enemies.forEach((enemy) => {
 				enemy.draw(context);
 			});
+			// 맨 앞에 위치하는 layer4
+			this.background.layer4.draw(context);
 		}
 		addEnemy() {
 			this.enemies.push(new Angler1(this));
 		}
-		//
-		checkCollision(rect1: Player, rect2: Angler1) {
+		// 아래 조건들을 모두 만족하면 충돌, 하나라도 false이면 충돌 X
+		// 1. 적 영역이 왼쪽 위에서 플레이어 영역 x축 침범
+		// 2. 적 영역이 오른쪽 아래에서 플레이어 영역 x축 침범
+		// 3. 적 영역이 왼쪽 위에서 플레이어 영역 y축 침범
+		// 4. 적 영역이 오른쪽 아래에서 플레이어 영역 y축 침범
+
+		// 왼쪽위에서 충돌일 때는, 오른쪽 아래에서 충돌일 조건이 그냥 true
+		// 마찬가지로, 오른쪽 아래에서 충돌일 때는, 왼쪽 아래에서 충돌일 조건이 그냥 true
+		// 그래서 하나라도 false이면 충돌이 아님
+		checkCollision(rect1: Player | Projectile, rect2: Enemy) {
 			return (
 				rect1.x < rect2.x + rect2.width &&
 				rect1.x + rect1.width > rect2.x &&
 				rect1.y < rect2.y + rect2.height &&
-				rect1.height + rect1.y > rect2.y
+				rect1.y + rect1.height > rect2.y
 			);
 		}
 	}

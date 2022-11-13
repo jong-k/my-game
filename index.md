@@ -1,8 +1,16 @@
 # 목차
 ### 1. HTML & CSS setup
+- canvas element 내부에서 게임이 진행됨
+- CSS는 canvas element 크기 등을 정하기만 함
+- 게임 렌더링은 canvas API를 사용하여 JS로 구현
 ### 2. Basic JavaScript setup
+- 파일 로딩이 완료되면 자동으로 실행되는 이벤트 핸들러를 통해 게임을 시작
 ### 3. Object Oriented Programming with JavaScript
+- 클래스를 통해 각 세부 기능을 분리
 ### 4. Creating Player & Game objects
+- canvas API의 fillStyle 메서드를 통해 색을 지정
+- canvas API의 fillRect 메서드를 통해 사이즈를 규정
+  - fillrect(x, y, width, height)
 ### 5. Animation loop
 - animate 함수 생성
 ### 6. Keyboard inputs
