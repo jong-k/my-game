@@ -13,4 +13,13 @@
   - Player 클래스는, 인수로 Game 클래스의 인스턴스를 받음에 주의
 - shootTop 메서드는 game.ammo > 0 인 경우 (총알이 다 떨어지지 않은 경우) Player.projectiles 배열에 Projectile 인스턴스를 추가
   - 그리고 game.ammo-- 처리
-- 
+
+## 에러1
+### 담당 클래스 : Explosion
+- Explosion.draw 에서 drawImage에 전달되는 인수 image가 null 인 상황이 있었다.
+- 알고 보니 sub class에서 추상 프로퍼티인 image를 정의할때 getElementById 에 #을 넣은 채로 id 이름을 전달해서 생긴 문제엿음
+- 타입 지정을 as로 강제하는 것이 이러한 문제를 만들었음... 대안이 필요할 듯 하다 옵셔널 체이닝 등등
+
+
+## 후기
+### 

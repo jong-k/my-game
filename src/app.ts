@@ -4,7 +4,7 @@ window.addEventListener('load', function () {
   const canvas = document.getElementById('canvas1') as HTMLCanvasElement;
   // 렌더링 컨텍스트 얻기, 컨텍스트는 2D 또는 WebGL (3D) 가능
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-  canvas.width = 500;
+  canvas.width = 700;
   canvas.height = 500;
 
   // 클래스는 호이스팅 가능하므로 밑에 배치해도 됨
@@ -39,6 +39,110 @@ window.addEventListener('load', function () {
       });
     }
   }
+  // 사운드 조절
+  class SoundController {
+    powerUpSound: HTMLMediaElement;
+    powerDownSound: HTMLMediaElement;
+    explosionSound: HTMLMediaElement;
+    shotSound: HTMLMediaElement;
+    hitSound: HTMLMediaElement;
+    shieldSound: HTMLMediaElement;
+
+    constructor() {
+      this.powerUpSound = document.getElementById(
+        'powerup'
+      ) as HTMLMediaElement;
+      this.powerDownSound = document.getElementById(
+        'powerdown'
+      ) as HTMLMediaElement;
+      this.explosionSound = document.getElementById(
+        'explosion'
+      ) as HTMLMediaElement;
+      this.shotSound = document.getElementById('shot') as HTMLMediaElement;
+      this.hitSound = document.getElementById('hit') as HTMLMediaElement;
+      this.shieldSound = document.getElementById(
+        'shieldSound'
+      ) as HTMLMediaElement;
+    }
+    powerUp() {
+      // 반복 재생을 위해 play 시간을 0으로 설정
+      this.powerUpSound.currentTime = 0;
+      this.powerUpSound.play();
+    }
+    powerDown() {
+      this.powerDownSound.currentTime = 0;
+      this.powerDownSound.play();
+    }
+    explosion() {
+      this.explosionSound.currentTime = 0;
+      this.explosionSound.play();
+    }
+    shot() {
+      this.shotSound.currentTime = 0;
+      this.shotSound.play();
+    }
+    hit() {
+      this.hitSound.currentTime = 0;
+      this.hitSound.play();
+    }
+    shield() {
+      this.shieldSound.currentTime = 0;
+      this.shieldSound.play();
+    }
+  }
+  // 보호막 발동
+  class Shield {
+    game: Game;
+    width: number;
+    height: number;
+    frameX: number;
+    maxFrame: number;
+    image: HTMLImageElement;
+    fps: number;
+    timer: number;
+    interval: number;
+
+    constructor(game: Game) {
+      this.game = game;
+      this.width = this.game.player.width;
+      this.height = this.game.player.height;
+      this.frameX = 0;
+      this.maxFrame = 24;
+      this.image = document.getElementById('shield') as HTMLImageElement;
+      this.fps = 30;
+      this.timer = 0;
+      this.interval = 1000 / this.fps;
+    }
+    update(deltaTime: number) {
+      if (this.frameX <= this.maxFrame) {
+        if (this.timer > this.interval) {
+          this.frameX++;
+          this.timer = 0;
+        } else {
+          this.timer++;
+        }
+      }
+    }
+    draw(context: CanvasRenderingContext2D) {
+      context.drawImage(
+        this.image,
+        this.frameX * this.width,
+        0,
+        this.width,
+        this.height,
+        this.game.player.x,
+        this.game.player.y,
+        this.width,
+        this.height
+      );
+    }
+    // shield 애니메이션이 아직 안끝났는데 다시 발생할 수도 있기 때문에 일단 frameX 0에서 시작
+    reset() {
+      this.frameX = 0;
+      this.game.sound.shield();
+    }
+  }
+
   // 플레이어가 발사하는 투사체
   class Projectile {
     game: Game;
@@ -49,23 +153,52 @@ window.addEventListener('load', function () {
     speed: number;
     markedForDeletion: boolean;
     image: HTMLImageElement;
+    frameX: number;
+    maxFrame: number;
+    fps: number;
+    timer: number;
+    interval: number;
 
     constructor(game: Game, x: number, y: number) {
       this.game = game;
       this.x = x;
       this.y = y;
-      this.width = 10;
-      this.height = 3;
-      this.speed = 3;
+      this.width = 36.25;
+      this.height = 20;
+      this.speed = Math.random() * 0.2 + 2.8;
       this.markedForDeletion = false; // 투사체가 멀어져서 삭제 가능한 상태인지 여부
-      this.image = document.getElementById('projectile') as HTMLImageElement;
+      this.image = document.getElementById('fireball') as HTMLImageElement;
+      this.frameX = 0;
+      this.maxFrame = 3;
+      this.fps = 20;
+      this.timer = 0;
+      this.interval = 1000 / this.fps;
     }
-    update() {
+    update(deltaTime: number) {
       this.x += this.speed;
-      if (this.x > this.game.width * 0.8) this.markedForDeletion = true; // width 80% 넘어가면 삭제 가능하게 바꿈
+      if (this.timer > this.interval) {
+        if (this.frameX < this.maxFrame) this.frameX++;
+        else this.frameX = 0;
+        this.timer = 0;
+      } else {
+        this.timer += deltaTime;
+      }
+
+      // width 80% 넘어가면 화면에서 사라짐
+      if (this.x > this.game.width * 0.8) this.markedForDeletion = true;
     }
     draw(context: CanvasRenderingContext2D) {
-      context.drawImage(this.image, this.x, this.y);
+      context.drawImage(
+        this.image,
+        this.frameX * this.width,
+        0,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
     }
   }
 
@@ -204,7 +337,7 @@ window.addEventListener('load', function () {
 
       // 투사체 배열의 개별 투사체 업데이트
       this.projectiles.forEach((projectile) => {
-        projectile.update();
+        projectile.update(deltaTime);
       });
       // 투사체 배열에서 markedForDeletion false만 남김
       // true인 것은 배열에서 빠져서 렌더링 안됨
@@ -225,6 +358,7 @@ window.addEventListener('load', function () {
           this.powerUpTimer = 0;
           this.powerUp = false;
           this.frameY = 0; // 일반 상태 이미지
+          this.game.sound.powerDown();
         } else {
           this.powerUpTimer += deltaTime;
           this.frameY = 1; // power up 되면 이미지가 변화하고
@@ -255,6 +389,7 @@ window.addEventListener('load', function () {
           new Projectile(this.game, this.x + 80, this.y + 30)
         );
         this.game.ammo--;
+        this.game.sound.shot();
       }
       if (this.powerUp) this.shootBottom();
     }
@@ -271,6 +406,7 @@ window.addEventListener('load', function () {
       if (this.game.ammo < this.game.maxAmmo) {
         this.game.ammo = this.game.maxAmmo;
       }
+      this.game.sound.powerUp();
     }
   }
 
@@ -351,7 +487,7 @@ window.addEventListener('load', function () {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('angler1') as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 3); // 0~2 사이에서 발생하므로, 이미지 시트에서 0~2 row 에서 하나 랜덤하게 골라짐
-      this.lives = 2;
+      this.lives = 5;
       this.score = this.lives;
       this.type = '';
     }
@@ -374,7 +510,7 @@ window.addEventListener('load', function () {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('angler2') as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
-      this.lives = 3;
+      this.lives = 6;
       this.score = this.lives;
       this.type = '';
     }
@@ -397,7 +533,7 @@ window.addEventListener('load', function () {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('lucky') as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
-      this.lives = 3;
+      this.lives = 5;
       this.score = 15;
       this.type = 'lucky';
     }
@@ -420,7 +556,7 @@ window.addEventListener('load', function () {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('hivewhale') as HTMLImageElement;
       this.frameY = 0;
-      this.lives = 15;
+      this.lives = 20;
       this.score = this.lives;
       this.type = 'hiveWhale';
       // speedX 범위 : -1.4 ~ -0.2
@@ -453,6 +589,106 @@ window.addEventListener('load', function () {
       this.type = 'drone';
       // speedX 범위 : -4.7 ~ -0.5
       this.speedX = Math.random() * -4.2 - 0.5;
+    }
+  }
+
+  class BulbWhale extends Enemy {
+    width: number;
+    height: number;
+    y: number;
+    image: HTMLImageElement;
+    frameY: number;
+    lives: number;
+    score: number;
+    type: string;
+
+    constructor(game: Game) {
+      super(game);
+      this.width = 270;
+      this.height = 219;
+      this.y = Math.random() * (this.game.height * 0.95 - this.height);
+      this.image = document.getElementById('bulbwhale') as HTMLImageElement;
+      this.frameY = Math.floor(Math.random() * 2);
+      this.lives = 20;
+      this.score = this.lives;
+      this.type = 'bulbwhale';
+      // speedX 범위 : -1.4 ~ -0.2
+      this.speedX = Math.random() * -1.2 - 0.2;
+    }
+  }
+
+  class MoonFish extends Enemy {
+    width: number;
+    height: number;
+    y: number;
+    image: HTMLImageElement;
+    frameY: number;
+    lives: number;
+    score: number;
+    type: string;
+
+    constructor(game: Game) {
+      super(game);
+      this.width = 227;
+      this.height = 240;
+      this.y = Math.random() * (this.game.height * 0.95 - this.height);
+      this.image = document.getElementById('moonfish') as HTMLImageElement;
+      this.frameY = 0;
+      this.lives = 10;
+      this.score = this.lives;
+      this.type = 'moonfish';
+      // speedX 범위 : -3.2 ~ -2
+      this.speedX = Math.random() * -1.2 - 2;
+    }
+  }
+
+  class Stalker extends Enemy {
+    width: number;
+    height: number;
+    y: number;
+    image: HTMLImageElement;
+    frameY: number;
+    lives: number;
+    score: number;
+    type: string;
+
+    constructor(game: Game) {
+      super(game);
+      this.width = 243;
+      this.height = 123;
+      this.y = Math.random() * (this.game.height * 0.95 - this.height);
+      this.image = document.getElementById('stalker') as HTMLImageElement;
+      this.frameY = 0;
+      this.lives = 10;
+      this.score = this.lives;
+      this.type = 'stalker';
+      // speedX 범위 : -2 ~ -0.8
+      this.speedX = Math.random() * -1.2 - 0.8;
+    }
+  }
+
+  class Razorfin extends Enemy {
+    width: number;
+    height: number;
+    y: number;
+    image: HTMLImageElement;
+    frameY: number;
+    lives: number;
+    score: number;
+    type: string;
+
+    constructor(game: Game) {
+      super(game);
+      this.width = 187;
+      this.height = 149;
+      this.y = Math.random() * (this.game.height * 0.95 - this.height);
+      this.image = document.getElementById('razorfin') as HTMLImageElement;
+      this.frameY = 0;
+      this.lives = 7;
+      this.score = this.lives;
+      this.type = 'razorfin';
+      // speedX 범위 : -2 ~ -0.8
+      this.speedX = Math.random() * -1.2 - 0.8;
     }
   }
 
@@ -527,6 +763,7 @@ window.addEventListener('load', function () {
     game: Game;
     x: number;
     y: number;
+    abstract image: HTMLImageElement;
     frameX: number;
     spriteWidth: number;
     spriteHeight: number;
@@ -537,7 +774,6 @@ window.addEventListener('load', function () {
     interval: number;
     markedForDeletion: boolean;
     maxFrame: number;
-    abstract image: HTMLImageElement;
 
     constructor(game: Game, x: number, y: number) {
       this.game = game;
@@ -548,6 +784,7 @@ window.addEventListener('load', function () {
       this.height = this.spriteHeight;
       this.x = x - this.width * 0.5;
       this.y = y - this.height * 0.5;
+      // 게임 전체의 fps와 폭발 효과의 fps를 분리
       this.fps = 30;
       this.timer = 0;
       this.interval = 1000 / this.fps;
@@ -565,7 +802,6 @@ window.addEventListener('load', function () {
       if (this.frameX > this.maxFrame) this.markedForDeletion = true;
     }
     draw(context: CanvasRenderingContext2D) {
-      console.log(typeof context);
       context.drawImage(
         this.image,
         this.frameX * this.spriteWidth,
@@ -587,7 +823,7 @@ window.addEventListener('load', function () {
     constructor(game: Game, x: number, y: number) {
       super(game, x, y);
       this.image = document.getElementById(
-        '#smokeExplosion'
+        'smokeExplosion'
       ) as HTMLImageElement;
     }
   }
@@ -598,9 +834,7 @@ window.addEventListener('load', function () {
 
     constructor(game: Game, x: number, y: number) {
       super(game, x, y);
-      this.image = document.getElementById(
-        '#fireExplosion'
-      ) as HTMLImageElement;
+      this.image = document.getElementById('fireExplosion') as HTMLImageElement;
     }
   }
 
@@ -642,7 +876,7 @@ window.addEventListener('load', function () {
           message2 = 'Well done explorer!';
         } else {
           message1 = 'You lose!';
-          message2 = 'Get your repair kit and try again!';
+          message2 = 'Try again!';
         }
         context.font = '70px ' + this.fontFamily;
         context.fillText(
@@ -676,6 +910,8 @@ window.addEventListener('load', function () {
     player: Player;
     input: InputHandler;
     ui: UI;
+    sound: SoundController;
+    shield: Shield;
     keys: string[];
     enemies: Enemy[];
     particles: Particle[];
@@ -701,6 +937,8 @@ window.addEventListener('load', function () {
       this.player = new Player(this);
       this.input = new InputHandler(this);
       this.ui = new UI(this);
+      this.sound = new SoundController();
+      this.shield = new Shield(this);
       this.keys = [];
       this.enemies = [];
       this.particles = [];
@@ -708,14 +946,14 @@ window.addEventListener('load', function () {
       this.ammo = 20; // 초기 총알
       this.maxAmmo = 50;
       this.ammoTimer = 0;
-      this.ammoInterval = 500; // 0.5초마다 ammo 충전
+      this.ammoInterval = 350; // 0.5초마다 ammo 충전
       this.enemyTimer = 0;
-      this.enemyInterval = 1000;
+      this.enemyInterval = 2000;
       this.gameOver = false;
       this.score = 0;
-      this.winningScore = 10;
+      this.winningScore = 80;
       this.gameTime = 0;
-      this.timeLimit = 15000;
+      this.timeLimit = 30000;
       this.speed = 1;
       this.debug = false;
     }
@@ -733,6 +971,8 @@ window.addEventListener('load', function () {
       } else {
         this.ammoTimer += deltaTime; // 시간 흐름과 일치
       }
+      // shield update
+      this.shield.update(deltaTime);
       // 파티클 업데이트
       this.particles.forEach((particle) => particle.update());
       this.particles = this.particles.filter(
@@ -749,6 +989,8 @@ window.addEventListener('load', function () {
         if (this.checkCollision(this.player, enemy)) {
           enemy.markedForDeletion = true;
           this.addExplosion(enemy);
+          this.sound.hit();
+          this.shield.reset();
           // 적이 player와 충돌하면 파티클 최대 10번 생성
           for (let i = 0; i < enemy.score; i++) {
             this.particles.push(
@@ -761,7 +1003,7 @@ window.addEventListener('load', function () {
           }
           // lucky fish와 닿으면 powerUp
           if (enemy.type === 'lucky') this.player.enterPowerUp();
-          else this.score--;
+          else if (!this.gameOver) this.score--;
         }
         // 투사체와 적 충돌 발생 시
         this.player.projectiles.forEach((projectile) => {
@@ -789,6 +1031,11 @@ window.addEventListener('load', function () {
               }
               enemy.markedForDeletion = true;
               this.addExplosion(enemy);
+              this.sound.explosion();
+              // 파괴된 적이 moonfish 인 경우 power up
+              if (enemy.type === 'moonfish') {
+                this.player.enterPowerUp();
+              }
               // 파괴된 적이 hive whale 인 경우 drone 5기 생성
               if (enemy.type === 'hiveWhale') {
                 for (let i = 0; i < 5; i++) {
@@ -802,7 +1049,8 @@ window.addEventListener('load', function () {
                 }
               }
               if (!this.gameOver) this.score += enemy.score;
-              if (this.score > this.winningScore) this.gameOver = true;
+              // winning score 달성안해도 시간 남아있으면 게임 계속
+              // if (this.score > this.winningScore) this.gameOver = true;
             }
           }
         });
@@ -820,6 +1068,7 @@ window.addEventListener('load', function () {
       this.background.draw(context);
       this.ui.draw(context);
       this.player.draw(context);
+      this.shield.draw(context);
       this.particles.forEach((particle) => particle.draw(context));
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
@@ -832,9 +1081,13 @@ window.addEventListener('load', function () {
     }
     addEnemy() {
       const randomize = Math.random();
-      if (randomize < 0.3) this.enemies.push(new Angler1(this));
-      else if (randomize < 0.6) this.enemies.push(new Angler2(this));
-      else if (randomize < 0.8) this.enemies.push(new HiveWhale(this));
+      if (randomize < 0.2) this.enemies.push(new Angler1(this));
+      else if (randomize < 0.4) this.enemies.push(new Angler2(this));
+      else if (randomize < 0.5) this.enemies.push(new Razorfin(this));
+      else if (randomize < 0.6) this.enemies.push(new Stalker(this));
+      else if (randomize < 0.7) this.enemies.push(new HiveWhale(this));
+      else if (randomize < 0.8) this.enemies.push(new BulbWhale(this));
+      else if (randomize < 0.9) this.enemies.push(new MoonFish(this));
       else this.enemies.push(new LuckyFish(this));
     }
     addExplosion(enemy: Enemy) {
