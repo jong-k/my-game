@@ -1,9 +1,9 @@
 // type: 'load' : 서버로부터 전체 파일 (HTML, CSS, image 등) 을 모두 응답으로 받았을 때
-window.addEventListener('load', function () {
+window.addEventListener("load", function () {
   // canvas setup
-  const canvas = document.getElementById('canvas1') as HTMLCanvasElement;
+  const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
   // 렌더링 컨텍스트 얻기, 컨텍스트는 2D 또는 WebGL (3D) 가능
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   canvas.width = 700;
   canvas.height = 500;
 
@@ -17,23 +17,23 @@ window.addEventListener('load', function () {
       // 화살표 위, 아래 키가 눌리면 Game 클래스의 눌린 키 보관하는 배열인 key에 push
       // 같은 키를 계속 누르고 있어도 계속 push되지 않게 구현 ->
       // 왜냐하면, 키 계속 누르고 있다가 떼면 keydown은 많은데, keyup은 1번밖에 없어져서 처리하기가 곤란함
-      window.addEventListener('keydown', (e) => {
+      window.addEventListener("keydown", (e) => {
         if (
-          (e.key === 'ArrowUp' || e.key === 'ArrowDown') &&
-          this.game.keys.indexOf(e.key) === -1
+          (e.key === "ArrowUp" || e.key === "ArrowDown") &&
+          !this.game.keys.includes(e.key)
         ) {
           this.game.keys.push(e.key);
-        } else if (e.key === ' ') {
+        } else if (e.key === " ") {
           // 스페이스바 입력
           this.game.player.shootTop();
-        } else if (e.key === 'd') {
+        } else if (e.key === "d") {
           // 디버그 모드
           this.game.debug = !this.game.debug;
         }
       });
       // 키를 떼면, Game 클래스의 keys 배열에서 제거
-      window.addEventListener('keyup', (e) => {
-        if (this.game.keys.indexOf(e.key) > -1) {
+      window.addEventListener("keyup", (e) => {
+        if (this.game.keys.includes(e.key)) {
           this.game.keys.splice(this.game.keys.indexOf(e.key), 1);
         }
       });
@@ -50,41 +50,47 @@ window.addEventListener('load', function () {
 
     constructor() {
       this.powerUpSound = document.getElementById(
-        'powerup'
+        "powerup",
       ) as HTMLMediaElement;
       this.powerDownSound = document.getElementById(
-        'powerdown'
+        "powerdown",
       ) as HTMLMediaElement;
       this.explosionSound = document.getElementById(
-        'explosion'
+        "explosion",
       ) as HTMLMediaElement;
-      this.shotSound = document.getElementById('shot') as HTMLMediaElement;
-      this.hitSound = document.getElementById('hit') as HTMLMediaElement;
+      this.shotSound = document.getElementById("shot") as HTMLMediaElement;
+      this.hitSound = document.getElementById("hit") as HTMLMediaElement;
       this.shieldSound = document.getElementById(
-        'shieldSound'
+        "shieldSound",
       ) as HTMLMediaElement;
     }
+
     powerUp() {
       // 반복 재생을 위해 play 시간을 0으로 설정
       this.powerUpSound.currentTime = 0;
       this.powerUpSound.play();
     }
+
     powerDown() {
       this.powerDownSound.currentTime = 0;
       this.powerDownSound.play();
     }
+
     explosion() {
       this.explosionSound.currentTime = 0;
       this.explosionSound.play();
     }
+
     shot() {
       this.shotSound.currentTime = 0;
       this.shotSound.play();
     }
+
     hit() {
       this.hitSound.currentTime = 0;
       this.hitSound.play();
     }
+
     shield() {
       this.shieldSound.currentTime = 0;
       this.shieldSound.play();
@@ -108,11 +114,12 @@ window.addEventListener('load', function () {
       this.height = this.game.player.height;
       this.frameX = 0;
       this.maxFrame = 24;
-      this.image = document.getElementById('shield') as HTMLImageElement;
+      this.image = document.getElementById("shield") as HTMLImageElement;
       this.fps = 30;
       this.timer = 0;
       this.interval = 1000 / this.fps;
     }
+
     update(deltaTime: number) {
       if (this.frameX <= this.maxFrame) {
         if (this.timer > this.interval) {
@@ -123,6 +130,7 @@ window.addEventListener('load', function () {
         }
       }
     }
+
     draw(context: CanvasRenderingContext2D) {
       context.drawImage(
         this.image,
@@ -133,9 +141,10 @@ window.addEventListener('load', function () {
         this.game.player.x,
         this.game.player.y,
         this.width,
-        this.height
+        this.height,
       );
     }
+
     // shield 애니메이션이 아직 안끝났는데 다시 발생할 수도 있기 때문에 일단 frameX 0에서 시작
     reset() {
       this.frameX = 0;
@@ -167,13 +176,14 @@ window.addEventListener('load', function () {
       this.height = 20;
       this.speed = Math.random() * 0.2 + 2.8;
       this.markedForDeletion = false; // 투사체가 멀어져서 삭제 가능한 상태인지 여부
-      this.image = document.getElementById('fireball') as HTMLImageElement;
+      this.image = document.getElementById("fireball") as HTMLImageElement;
       this.frameX = 0;
       this.maxFrame = 3;
       this.fps = 20;
       this.timer = 0;
       this.interval = 1000 / this.fps;
     }
+
     update(deltaTime: number) {
       this.x += this.speed;
       if (this.timer > this.interval) {
@@ -187,6 +197,7 @@ window.addEventListener('load', function () {
       // width 80% 넘어가면 화면에서 사라짐
       if (this.x > this.game.width * 0.8) this.markedForDeletion = true;
     }
+
     draw(context: CanvasRenderingContext2D) {
       context.drawImage(
         this.image,
@@ -197,7 +208,7 @@ window.addEventListener('load', function () {
         this.x,
         this.y,
         this.width,
-        this.height
+        this.height,
       );
     }
   }
@@ -226,7 +237,7 @@ window.addEventListener('load', function () {
       this.game = game;
       this.x = x;
       this.y = y;
-      this.image = document.getElementById('gears') as HTMLImageElement;
+      this.image = document.getElementById("gears") as HTMLImageElement;
       // 3 * 3 이미지 시트에서 랜덤한 이미지를 골라 사용
       this.frameX = Math.floor(Math.random() * 3);
       this.frameY = Math.floor(Math.random() * 3);
@@ -247,6 +258,7 @@ window.addEventListener('load', function () {
       // 바운스 지점을 그라운드 특정 영역 사이에서 랜덤하게 지정
       this.bottomBounceBoundary = Math.random() * 80 + 60;
     }
+
     update() {
       this.angle += this.velocityOfAngle;
       this.speedY += this.gravity;
@@ -263,6 +275,7 @@ window.addEventListener('load', function () {
         this.speedY *= -0.7;
       }
     }
+
     draw(context: CanvasRenderingContext2D) {
       // this.x, this.y 를 수정할 때는 save, restore를 사용하여 다음 인스턴스에 영향이 없도록 해야함
       context.save();
@@ -280,7 +293,7 @@ window.addEventListener('load', function () {
         this.size * -0.5,
         this.size * -0.5,
         this.size,
-        this.size
+        this.size,
       );
       context.restore();
     }
@@ -316,15 +329,16 @@ window.addEventListener('load', function () {
       this.speedY = 0; // player의 속도. 음수이면 위로 움직임
       this.maxSpeed = 3;
       this.projectiles = [];
-      this.image = document.getElementById('player') as HTMLImageElement;
+      this.image = document.getElementById("player") as HTMLImageElement;
       this.powerUp = false;
       this.powerUpTimer = 0;
       this.powerUpLimit = 10000;
     }
+
     update(deltaTime: number) {
       // 입력받은 키에 따라 player 위치 (x, y) 수정
-      if (this.game.keys.includes('ArrowUp')) this.speedY = -this.maxSpeed;
-      else if (this.game.keys.includes('ArrowDown'))
+      if (this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed;
+      else if (this.game.keys.includes("ArrowDown"))
         this.speedY = this.maxSpeed;
       else this.speedY = 0;
       this.y += this.speedY; // 실제로 player 움직이게 하는 부분
@@ -342,7 +356,7 @@ window.addEventListener('load', function () {
       // 투사체 배열에서 markedForDeletion false만 남김
       // true인 것은 배열에서 빠져서 렌더링 안됨
       this.projectiles = this.projectiles.filter(
-        (projectile) => !projectile.markedForDeletion
+        (projectile) => !projectile.markedForDeletion,
       );
       // sprite animation
       // 이미지 시트(살짝 다르고 크게는 같은 이미지 여러장이 일렬로 늘어선 이미지)를 사용하여,
@@ -366,11 +380,14 @@ window.addEventListener('load', function () {
         }
       }
     }
+
     draw(context: CanvasRenderingContext2D) {
       // fillRect -> strokeRect : 투명한 박스
       if (this.game.debug)
         context.strokeRect(this.x, this.y, this.width, this.height);
-      this.projectiles.forEach((projectile) => projectile.draw(context));
+      this.projectiles.forEach((projectile) => {
+        projectile.draw(context);
+      });
       context.drawImage(
         this.image,
         this.frameX * this.width,
@@ -380,26 +397,29 @@ window.addEventListener('load', function () {
         this.x,
         this.y,
         this.width,
-        this.height
+        this.height,
       );
     }
+
     shootTop() {
       if (this.game.ammo > 0) {
         this.projectiles.push(
-          new Projectile(this.game, this.x + 80, this.y + 30)
+          new Projectile(this.game, this.x + 80, this.y + 30),
         );
         this.game.ammo--;
         this.game.sound.shot();
       }
       if (this.powerUp) this.shootBottom();
     }
+
     shootBottom() {
       if (this.game.ammo > 0) {
         this.projectiles.push(
-          new Projectile(this.game, this.x + 80, this.y + 175)
+          new Projectile(this.game, this.x + 80, this.y + 175),
         );
       }
     }
+
     enterPowerUp() {
       this.powerUpTimer = 0;
       this.powerUp = true;
@@ -461,10 +481,10 @@ window.addEventListener('load', function () {
         this.x,
         this.y,
         this.width,
-        this.height
+        this.height,
       );
       if (this.game.debug) {
-        context.font = '20px Helvetica';
+        context.font = "20px Helvetica";
         context.fillText(String(this.lives), this.x, this.y);
       }
     }
@@ -485,11 +505,11 @@ window.addEventListener('load', function () {
       this.width = 228;
       this.height = 169;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('angler1') as HTMLImageElement;
+      this.image = document.getElementById("angler1") as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 3); // 0~2 사이에서 발생하므로, 이미지 시트에서 0~2 row 에서 하나 랜덤하게 골라짐
       this.lives = 5;
       this.score = this.lives;
-      this.type = '';
+      this.type = "";
     }
   }
 
@@ -508,11 +528,11 @@ window.addEventListener('load', function () {
       this.width = 213;
       this.height = 165;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('angler2') as HTMLImageElement;
+      this.image = document.getElementById("angler2") as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
       this.lives = 6;
       this.score = this.lives;
-      this.type = '';
+      this.type = "";
     }
   }
 
@@ -531,11 +551,11 @@ window.addEventListener('load', function () {
       this.width = 99;
       this.height = 95;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('lucky') as HTMLImageElement;
+      this.image = document.getElementById("lucky") as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
       this.lives = 5;
       this.score = 15;
-      this.type = 'lucky';
+      this.type = "lucky";
     }
   }
 
@@ -554,11 +574,11 @@ window.addEventListener('load', function () {
       this.width = 400;
       this.height = 227;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('hivewhale') as HTMLImageElement;
+      this.image = document.getElementById("hivewhale") as HTMLImageElement;
       this.frameY = 0;
       this.lives = 20;
       this.score = this.lives;
-      this.type = 'hiveWhale';
+      this.type = "hiveWhale";
       // speedX 범위 : -1.4 ~ -0.2
       this.speedX = Math.random() * -1.2 - 0.2;
     }
@@ -582,11 +602,11 @@ window.addEventListener('load', function () {
       this.height = 95;
       this.x = x;
       this.y = y;
-      this.image = document.getElementById('drone') as HTMLImageElement;
+      this.image = document.getElementById("drone") as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
       this.lives = 3;
       this.score = this.lives;
-      this.type = 'drone';
+      this.type = "drone";
       // speedX 범위 : -4.7 ~ -0.5
       this.speedX = Math.random() * -4.2 - 0.5;
     }
@@ -607,11 +627,11 @@ window.addEventListener('load', function () {
       this.width = 270;
       this.height = 219;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('bulbwhale') as HTMLImageElement;
+      this.image = document.getElementById("bulbwhale") as HTMLImageElement;
       this.frameY = Math.floor(Math.random() * 2);
       this.lives = 20;
       this.score = this.lives;
-      this.type = 'bulbwhale';
+      this.type = "bulbwhale";
       // speedX 범위 : -1.4 ~ -0.2
       this.speedX = Math.random() * -1.2 - 0.2;
     }
@@ -632,11 +652,11 @@ window.addEventListener('load', function () {
       this.width = 227;
       this.height = 240;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('moonfish') as HTMLImageElement;
+      this.image = document.getElementById("moonfish") as HTMLImageElement;
       this.frameY = 0;
       this.lives = 10;
       this.score = this.lives;
-      this.type = 'moonfish';
+      this.type = "moonfish";
       // speedX 범위 : -3.2 ~ -2
       this.speedX = Math.random() * -1.2 - 2;
     }
@@ -657,11 +677,11 @@ window.addEventListener('load', function () {
       this.width = 243;
       this.height = 123;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('stalker') as HTMLImageElement;
+      this.image = document.getElementById("stalker") as HTMLImageElement;
       this.frameY = 0;
       this.lives = 10;
       this.score = this.lives;
-      this.type = 'stalker';
+      this.type = "stalker";
       // speedX 범위 : -2 ~ -0.8
       this.speedX = Math.random() * -1.2 - 0.8;
     }
@@ -682,11 +702,11 @@ window.addEventListener('load', function () {
       this.width = 187;
       this.height = 149;
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
-      this.image = document.getElementById('razorfin') as HTMLImageElement;
+      this.image = document.getElementById("razorfin") as HTMLImageElement;
       this.frameY = 0;
       this.lives = 7;
       this.score = this.lives;
-      this.type = 'razorfin';
+      this.type = "razorfin";
       // speedX 범위 : -2 ~ -0.8
       this.speedX = Math.random() * -1.2 - 0.8;
     }
@@ -711,11 +731,13 @@ window.addEventListener('load', function () {
       this.x = 0;
       this.y = 0;
     }
+
     update() {
       // 배경 이미지가 (0, 0) 을 지나서 왼쪽으로 계속 가다가(음수), 이미지 width를 지나면 다시 0으로 초기화
       if (this.x <= -this.width) this.x = 0;
       this.x -= this.game.speed * this.speedModifier;
     }
+
     draw(context: CanvasRenderingContext2D) {
       // 이미지를 2개를 연달아 배치하여, 첫 이미지 끝나고 잠깐 빈 화면이 보이는 것을 방지
       // 2번째 이미지는 한 캔버스 크기만 보이게 됨
@@ -739,10 +761,10 @@ window.addEventListener('load', function () {
 
     constructor(game: Game) {
       this.game = game;
-      this.image1 = document.getElementById('layer1') as HTMLImageElement;
-      this.image2 = document.getElementById('layer2') as HTMLImageElement;
-      this.image3 = document.getElementById('layer3') as HTMLImageElement;
-      this.image4 = document.getElementById('layer4') as HTMLImageElement;
+      this.image1 = document.getElementById("layer1") as HTMLImageElement;
+      this.image2 = document.getElementById("layer2") as HTMLImageElement;
+      this.image3 = document.getElementById("layer3") as HTMLImageElement;
+      this.image4 = document.getElementById("layer4") as HTMLImageElement;
       this.layer1 = new Layer(this.game, this.image1, 0.2);
       this.layer2 = new Layer(this.game, this.image2, 0.4);
       this.layer3 = new Layer(this.game, this.image3, 1);
@@ -750,11 +772,17 @@ window.addEventListener('load', function () {
       // layer4는 가장 앞에 렌더링되어야 하기 때문에 따로 빼줌
       this.layers = [this.layer1, this.layer2, this.layer3];
     }
+
     update() {
-      this.layers.forEach((layer) => layer.update());
+      this.layers.forEach((layer) => {
+        layer.update();
+      });
     }
+
     draw(context: CanvasRenderingContext2D) {
-      this.layers.forEach((layer) => layer.draw(context));
+      this.layers.forEach((layer) => {
+        layer.draw(context);
+      });
     }
   }
 
@@ -791,6 +819,7 @@ window.addEventListener('load', function () {
       this.markedForDeletion = false;
       this.maxFrame = 8;
     }
+
     update(deltaTime: number) {
       this.x -= this.game.speed;
       if (this.timer > this.interval) {
@@ -801,6 +830,7 @@ window.addEventListener('load', function () {
       }
       if (this.frameX > this.maxFrame) this.markedForDeletion = true;
     }
+
     draw(context: CanvasRenderingContext2D) {
       context.drawImage(
         this.image,
@@ -811,7 +841,7 @@ window.addEventListener('load', function () {
         this.x,
         this.y,
         this.width,
-        this.height
+        this.height,
       );
     }
   }
@@ -823,7 +853,7 @@ window.addEventListener('load', function () {
     constructor(game: Game, x: number, y: number) {
       super(game, x, y);
       this.image = document.getElementById(
-        'smokeExplosion'
+        "smokeExplosion",
       ) as HTMLImageElement;
     }
   }
@@ -834,7 +864,7 @@ window.addEventListener('load', function () {
 
     constructor(game: Game, x: number, y: number) {
       super(game, x, y);
-      this.image = document.getElementById('fireExplosion') as HTMLImageElement;
+      this.image = document.getElementById("fireExplosion") as HTMLImageElement;
     }
   }
 
@@ -843,14 +873,15 @@ window.addEventListener('load', function () {
     game: Game;
     fontSize: number;
     fontFamily: string;
-    color: 'white';
+    color: "white";
 
     constructor(game: Game) {
       this.game = game;
       this.fontSize = 25;
-      this.fontFamily = 'Bangers';
-      this.color = 'white';
+      this.fontFamily = "Bangers";
+      this.color = "white";
     }
+
     draw(context: CanvasRenderingContext2D) {
       // 기본값을 저장하고 변형한 것을 렌더링하다가
       context.save();
@@ -858,41 +889,41 @@ window.addEventListener('load', function () {
       // 그림자를 X축으로 드리우기
       context.shadowOffsetX = 2;
       context.shadowOffsetY = 2;
-      context.shadowColor = 'black';
-      context.font = this.fontSize + 'px ' + this.fontFamily;
+      context.shadowColor = "black";
+      context.font = this.fontSize + "px " + this.fontFamily;
       // 점수
-      context.fillText('Score: ' + this.game.score, 20, 40);
+      context.fillText("Score: " + this.game.score, 20, 40);
 
       // 타이머
       const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
-      context.fillText('Timer: ' + formattedTime, 20, 100);
+      context.fillText("Timer: " + formattedTime, 20, 100);
       // 게임 오버 메시지
       if (this.game.gameOver) {
-        context.textAlign = 'center';
+        context.textAlign = "center";
         let message1;
         let message2;
         if (this.game.score > this.game.winningScore) {
-          message1 = 'You win!';
-          message2 = 'Well done explorer!';
+          message1 = "You win!";
+          message2 = "Well done explorer!";
         } else {
-          message1 = 'You lose!';
-          message2 = 'Try again!';
+          message1 = "You lose!";
+          message2 = "Try again!";
         }
-        context.font = '70px ' + this.fontFamily;
+        context.font = "70px " + this.fontFamily;
         context.fillText(
           message1,
           this.game.width * 0.5,
-          this.game.height * 0.5 - 20
+          this.game.height * 0.5 - 20,
         );
-        context.font = '25px ' + this.fontFamily;
+        context.font = "25px " + this.fontFamily;
         context.fillText(
           message2,
           this.game.width * 0.5,
-          this.game.height * 0.5 + 20
+          this.game.height * 0.5 + 20,
         );
       }
       // 총알
-      if (this.game.player.powerUp) context.fillStyle = '#ffffbd';
+      if (this.game.player.powerUp) context.fillStyle = "#ffffbd";
       for (let i = 0; i < this.game.ammo; i++) {
         context.fillRect(20 + 5 * i, 50, 3, 20);
       }
@@ -957,6 +988,7 @@ window.addEventListener('load', function () {
       this.speed = 1;
       this.debug = false;
     }
+
     update(deltaTime: number) {
       if (!this.gameOver) this.gameTime += deltaTime;
       if (this.gameTime > this.timeLimit) this.gameOver = true;
@@ -974,14 +1006,18 @@ window.addEventListener('load', function () {
       // shield update
       this.shield.update(deltaTime);
       // 파티클 업데이트
-      this.particles.forEach((particle) => particle.update());
+      this.particles.forEach((particle) => {
+        particle.update();
+      });
       this.particles = this.particles.filter(
-        (particle) => !particle.markedForDeletion
+        (particle) => !particle.markedForDeletion,
       );
       // 폭발 효과
-      this.explosions.forEach((explosion) => explosion.update(deltaTime));
+      this.explosions.forEach((explosion) => {
+        explosion.update(deltaTime);
+      });
       this.explosions = this.explosions.filter(
-        (explosion) => !explosion.markedForDeletion
+        (explosion) => !explosion.markedForDeletion,
       );
       // 적 자동 출현
       this.enemies.forEach((enemy) => {
@@ -997,12 +1033,12 @@ window.addEventListener('load', function () {
               new Particle(
                 this,
                 enemy.x + enemy.width * 0.5,
-                enemy.y + enemy.height * 0.5
-              )
+                enemy.y + enemy.height * 0.5,
+              ),
             );
           }
           // lucky fish와 닿으면 powerUp
-          if (enemy.type === 'lucky') this.player.enterPowerUp();
+          if (enemy.type === "lucky") this.player.enterPowerUp();
           else if (!this.gameOver) this.score--;
         }
         // 투사체와 적 충돌 발생 시
@@ -1015,8 +1051,8 @@ window.addEventListener('load', function () {
               new Particle(
                 this,
                 enemy.x + enemy.width * 0.5,
-                enemy.y + enemy.height * 0.5
-              )
+                enemy.y + enemy.height * 0.5,
+              ),
             );
             if (enemy.lives <= 0) {
               // 적 라이프가 0이 되면 파티클 최대 10번 생성
@@ -1025,26 +1061,26 @@ window.addEventListener('load', function () {
                   new Particle(
                     this,
                     enemy.x + enemy.width * 0.5,
-                    enemy.y + enemy.height * 0.5
-                  )
+                    enemy.y + enemy.height * 0.5,
+                  ),
                 );
               }
               enemy.markedForDeletion = true;
               this.addExplosion(enemy);
               this.sound.explosion();
               // 파괴된 적이 moonfish 인 경우 power up
-              if (enemy.type === 'moonfish') {
+              if (enemy.type === "moonfish") {
                 this.player.enterPowerUp();
               }
               // 파괴된 적이 hive whale 인 경우 drone 5기 생성
-              if (enemy.type === 'hiveWhale') {
+              if (enemy.type === "hiveWhale") {
                 for (let i = 0; i < 5; i++) {
                   this.enemies.push(
                     new Drone(
                       this,
                       enemy.x + Math.random() * enemy.width,
-                      enemy.y + Math.random() * enemy.height * 0.5
-                    )
+                      enemy.y + Math.random() * enemy.height * 0.5,
+                    ),
                   );
                 }
               }
@@ -1063,13 +1099,16 @@ window.addEventListener('load', function () {
         this.enemyTimer += deltaTime;
       }
     }
+
     draw(context: CanvasRenderingContext2D) {
       // background를 가장 먼저 draw해서 가장 뒤에 위치하게 함
       this.background.draw(context);
       this.ui.draw(context);
       this.player.draw(context);
       this.shield.draw(context);
-      this.particles.forEach((particle) => particle.draw(context));
+      this.particles.forEach((particle) => {
+        particle.draw(context);
+      });
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
       });
@@ -1079,6 +1118,7 @@ window.addEventListener('load', function () {
       // 맨 앞에 위치하는 layer4
       this.background.layer4.draw(context);
     }
+
     addEnemy() {
       const randomize = Math.random();
       if (randomize < 0.2) this.enemies.push(new Angler1(this));
@@ -1090,6 +1130,7 @@ window.addEventListener('load', function () {
       else if (randomize < 0.9) this.enemies.push(new MoonFish(this));
       else this.enemies.push(new LuckyFish(this));
     }
+
     addExplosion(enemy: Enemy) {
       const randomize = Math.random();
       if (randomize < 0.5) {
@@ -1097,16 +1138,16 @@ window.addEventListener('load', function () {
           new SmokeExplosion(
             this,
             enemy.x + enemy.width * 0.5,
-            enemy.y + enemy.height * 0.5
-          )
+            enemy.y + enemy.height * 0.5,
+          ),
         );
       } else {
         this.explosions.push(
           new FireExplosion(
             this,
             enemy.x + enemy.width * 0.5,
-            enemy.y + enemy.height * 0.5
-          )
+            enemy.y + enemy.height * 0.5,
+          ),
         );
       }
     }
