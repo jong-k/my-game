@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  // font-family: ;
+}
+
+.login-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: url(../asset/login-background.jpg) no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.form-box {
+  position: relative;
+  width: 400px;
+  height: 450px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-title {
+  font-size: 2rem;
+  color: #fff;
+  text-align: center;
+}
+
+.input-box {
+  position: relative;
+  margin: 2rem 0;
+  width: 310px;
+  border-bottom: 2px solid #fff;
+
+  label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: 0.5s;
+  }
+
+  input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 0 2rem 0 0.5rem;
+    color: #fff;
+  }
+  // tilde : A 뒤에 존재하는 모든 B 셀렉터 선택
+  // 예) .line ~ .bg-green : line 셀렉터 뒤에 오는 모든 bg-green
+
+  // :valid : input or form 에서 내장 유효성검사에서 true
+  // :invalid : 유효성 검사에서 false
+
+  input:focus ~ label,
+  input:valid ~ label {
+    top: -0.4rem;
+  }
+
+  ion-icon {
+    position: absolute;
+    right: 0.5rem;
+    color: #fff;
+    font-size: 1.2rem;
+    top: 1.25rem;
+  }
+}
+
+.forget-box {
+  margin: -15px 0 15px;
+  font-size: 0.9rem;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+
+  .remember-container {
+    margin-left: -30%;
+  }
+
+  label {
+    input {
+      margin-right: 0.125rem;
+    }
+    a {
+      color: #fff;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.find-password {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login-btn {
+  width: 100%;
+  height: 2.5rem;
+  background: #fff;
+  border-radius: 2.5rem;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.signup-box {
+  font-size: 0.9rem;
+  color: #fff;
+  margin: 1.5rem 0 1.25rem;
+  text-align: center;
+
+  p a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    margin-left: 1.5rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

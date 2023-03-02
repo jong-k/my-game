@@ -27,7 +27,7 @@ HTML, CSS, TypeScript 로 만든 2D 슈팅 게임
 ```
 📦mygame
 ┣ 📂src
-┃ ┣ 📜app.ts : 컴파일 될 TS 파일
+┃ ┣ 📜index.ts : 컴파일 될 TS 파일
 ┃ ┣ 📜index.html : root page
 ┃ ┗ 📜style.css : 스타일
 ┣ 📜.gitignore

@@ -193,7 +193,6 @@ window.addEventListener("load", function () {
       } else {
         this.timer += deltaTime;
       }
-
       // width 80% 넘어가면 화면에서 사라짐
       if (this.x > this.game.width * 0.8) this.markedForDeletion = true;
     }
