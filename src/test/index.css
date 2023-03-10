@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +15,7 @@
   background: #4d79bc;
   max-width: 100%;
   max-height: 100%;
-  font-family: 'Bangers', cursive;
+  font-family: "Bangers", cursive;
 }
 
 #layer1, #layer2, #layer3, #layer4, #player, #angler1, #angler2, #lucky, #projectile, #gears,
@@ -22,3 +23,5 @@
 #stalker, #razorfin {
   display: none;
 }
+
+/*# sourceMappingURL=index.css.map */
