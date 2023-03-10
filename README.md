@@ -22,8 +22,6 @@ HTML, CSS, TypeScript 로 만든 2D 슈팅 게임
 
 - prettier
 
-> Web API인 Canvas API를 중점적으로 사용하여 애니메이션 및 그래픽, 시각화 처리했습니다. 게임 로직 구현을 위해 각 세부 Class를 기반으로 객체지향 프로그래밍 방법론을 사용했습니다.
-
 ### 2-2. 폴더 구조
 ```
 📦mygame
