@@ -1,20 +1,14 @@
 "use strict";
-// type: 'load' : 서버로부터 전체 파일 (HTML, CSS, image 등) 을 모두 응답으로 받았을 때
 window.addEventListener("load", function () {
     // canvas setup
     const canvas = document.getElementById("canvas1");
-    // 렌더링 컨텍스트 얻기, 컨텍스트는 2D 또는 WebGL (3D) 가능
     const ctx = canvas.getContext("2d");
     canvas.width = 700;
     canvas.height = 500;
-    // 클래스는 호이스팅 가능하므로 밑에 배치해도 됨
     // 유저 인풋에 따라 플레이어 움직임을 처리하는 클래스
     class InputHandler {
         constructor(game) {
             this.game = game;
-            // 화살표 위, 아래 키가 눌리면 Game 클래스의 눌린 키 보관하는 배열인 key에 push
-            // 같은 키를 계속 누르고 있어도 계속 push되지 않게 구현 ->
-            // 왜냐하면, 키 계속 누르고 있다가 떼면 keydown은 많은데, keyup은 1번밖에 없어져서 처리하기가 곤란함
             window.addEventListener("keydown", (e) => {
                 if ((e.key === "ArrowUp" || e.key === "ArrowDown") &&
                     !this.game.keys.includes(e.key)) {

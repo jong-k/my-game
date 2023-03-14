@@ -1,48 +1,22 @@
 # Game Development with TypeScript
-HTML, CSS, TypeScript 로 만든 2D 슈팅 게임
-## 목차
-### 1. 제작 배경
-### 2. 프로젝트 소개
-### 3. 후기
+> Canvas API, TypeScript 로 만든 2D 슈팅 게임
 
 ## 1. 제작 배경
-- 평소에 게임을 만들어보고 싶었는데, 유데미의 좋은 JavaScript 게임 개발 강의를 알게됐고, JavaScript 대신 TypeScript를 적용해서 만들어보자고 계획
-- TypeScript를 React에 적용하기 전에, Vanilla JS에도 적용해보고 싶었음
-- 객체지향 프로그래밍에 궁금증을 갖고 있었는데, 수많은 클래스로 이루어진 로직을 만들어가며 객체지향 프로그래밍이 무엇인지 어렴풋이 알게 되었음
+- 게임을 직접 개발해보고 싶었는데, Canvas API를 통해 JavaScript로 간단한 게임을 만들 수 있다는 것을 알게 되어 개발 진행
 
-## 2. 프로젝트 소개
-### 2-1. 사용된 기술과 종속성
-**Core**
+## 2. 개발 목표
+- 2D 슈팅 게임 만들기
+- TypeScript와 Class 연습 (+객체지향 프로그래밍)
+- Canvas API 연습
 
+## 3. 사용 기술
+### Core
+- Canvas API (Web API)
 - HTML
 - CSS
 - TypeScript
+### Lint
+- ESLint
+- Prettier
 
-**dependency**
-
-- prettier
-
-### 2-2. 폴더 구조
-```
-📦mygame
-┣ 📂src
-┃ ┣ 📜index.ts : 컴파일 될 TS 파일
-┃ ┣ 📜index.html : root page
-┃ ┗ 📜style.css : 스타일
-┣ 📜.gitignore
-┣ 📜.prettierrc
-┣ 📜index.md
-┣ 📜package.json
-┣ 📜package-lock.json
-┣ 📜README.md
-┗ 📜tsconfig.json
-```
-### 2-3. 사용법
-- TypeScript 설치 확인 후 dependency 설치
-  ```
-  npm i
-  ```
-- /dist/index.html 파일 열기
-
-## 3. 후기
-- 간단하지만, 어떤 웹앱보다도 인터랙티브한 이 게임이 단지 1000 여 줄의 코드와, 몇 장의 이미지 들로 구성된다는 것이 정말 신기하게 느껴진다.
+## 4. 배운 점
